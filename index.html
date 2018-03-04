@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detect Faces Sample</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+	<!--Load the AJAX API-->
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+		<script type="text/javascript">
+		
+		var valContempt=1;
+		var valDisgust=1;
+		var valFear=1;
+		var valHappiness=1;
+		var valNeutral=1;
+		var valSadness=1;
+		var valSurprise=1;
+		var valMoustache=1;
+		var valSideburns=1;
+		var valBeard=1;
+
+		// Load the Visualization API and the corechart package.
+		google.charts.load('current', {'packages':['corechart']});
+		google.charts.load('current', {'packages':['gauge']});
+
+		// Set a callback to run when the Google Visualization API is loaded.
+		function lmao ()
+		{
+			alert ("LMAO"); 
+			google.charts.setOnLoadCallback(drawEmotion);
+			google.charts.setOnLoadCallback(drawHairy);
+		}
+		// Callback that creates and populates a data table,
+		// instantiates the pie chart, passes in the data and
+		// draws it.
+		function drawEmotion() {
+
+			// Create the data table.
+			var data = new google.visualization.DataTable();
+			data.addColumn('string', 'Topping');
+			data.addColumn('number', 'Slices');
+			data.addRows([
+			['Anger', valAnger],
+			['Contempt', valContempt],
+			['Disgust', valDisgust],
+			['Fear', valFear],
+			['Happiness', valHappiness],
+			['Neutral', valNeutral],
+			['Sadness', valSadness],
+			['Surprise', valSurprise]
+        ]);
+
+        // Set chart options
+        var options = {'title':'What you are feeling',
+                       'width':400,
+                       'height':300};
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.visualization.PieChart(document.getElementById('emotionChart_div'));
+        chart.draw(data, options);
+		}
+	  
+		function drawHairy() {
+			var data = google.visualization.arrayToDataTable([
+				['Label', 'Value'],
+				['Moustache', valMoustache],
+				['Beard', valBeard],
+				['Sideburns', valSideburns]
+			]);
+			
+			var options = {
+				width: 400, height: 166,
+				redFrom: .9, redTo: 1,
+				yellowFrom:.75, yellowTo: .90,
+				minorTicks: .1
+			};
+			
+			var chart = new google.visualization.Gauge(document.getElementById('hairyChart_div'));
+			chart.draw(data, options);
+		}
+		function showStats() {
+			var div = document.getElementById("stat_div");
+			if (div.style.display == "block") {
+				div.style.display = "none";
+			} 
+			else {
+				div.style.display = "block";
+			}
+		}
+		
+		var valAnger; 
+
+    function processImage() {
+        // **********************************************
+        // *** Update or verify the following values. ***
+        // **********************************************
+
+        // Replace the subscriptionKey string value with your valid subscription key.
+        var subscriptionKey = "03f76b2c833a4279bb6442b80a47798f";
+
+        // Replace or verify the region.
+        //
+        // You must use the same region in your REST API call as you used to obtain your subscription keys.
+        // For example, if you obtained your subscription keys from the westus region, replace
+        // "westcentralus" in the URI below with "westus".
+        //
+        // NOTE: Free trial subscription keys are generated in the westcentralus region, so if you are using
+        // a free trial subscription key, you should not need to change this region.
+        var uriBase = "https://westcentralus.api.cognitive.microsoft.com/face/v1.0/detect";
+
+        // Request parameters.
+        var params = {
+            "returnFaceId": "true",
+            "returnFaceLandmarks": "false",
+            "returnFaceAttributes": "age,gender,headPose,smile,facialHair,glasses,emotion,hair,makeup,occlusion,accessories,blur,exposure,noise",
+        };
+
+        // Display the image.
+        var sourceImageUrl = document.getElementById("inputImage").value;
+        document.querySelector("#sourceImage").src = sourceImageUrl;
+
+        // Perform the REST API call.
+        $.ajax({
+            url: uriBase + "?" + $.param(params),
+
+            // Request headers.
+            beforeSend: function(xhrObj){
+                xhrObj.setRequestHeader("Content-Type","application/json");
+                xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
+            },
+
+            type: "POST",
+
+            // Request body.
+            data: '{"url": ' + '"' + sourceImageUrl + '"}',
+        })
+
+        .done(function(data) {
+            // Show formatted JSON on webpage.
+            $("#CalebLmao").val(JSON.stringify(data, null, 2));
+			valAnger = (data[0].faceAttributes.emotion.anger); 
+			valContempt = (data[0].faceAttributes.emotion.contempt);
+			valDisgust = (data[0].faceAttributes.emotion.disgust);
+			valFear = (data[0].faceAttributes.emotion.fear);
+			valHappiness = (data[0].faceAttributes.emotion.happiness);
+			valNeutral = (data[0].faceAttributes.emotion.neutral);
+			valSadness = (data[0].faceAttributes.emotion.sadness);
+			valSurprise = (data[0].faceAttributes.emotion.surprise);
+			valMoustache = (data[0].faceAttributes.facialHair.moustache);
+			valSideburns = (data[0].faceAttributes.facialHair.beard);
+			valBeard = (data[0].faceAttributes.facialHair.sideburns);
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            // Display error message.
+            var errorString = (errorThrown === "") ? "Error. " : errorThrown + " (" + jqXHR.status + "): ";
+            errorString += (jqXHR.responseText === "") ? "" : (jQuery.parseJSON(jqXHR.responseText).message) ? 
+                jQuery.parseJSON(jqXHR.responseText).message : jQuery.parseJSON(jqXHR.responseText).error.message;
+            alert(errorString);
+        });		
+    };
+	
+	function displayData ()
+	{
+		alert ("Your data has been processed!"); 
+		document.getElementById("demo").innerHTML = "Data:"; 
+		document.getElementById("demo").innerHTML = "Anger Levels:" + valAnger;
+		document.getElementById("demo").innerHTML = "Contempt Levels:" + valContempt;
+		document.getElementById("demo").innerHTML = "Disgust Levels:" + valDisgust;
+		document.getElementById("demo").innerHTML = "Fear Levels:" + valFear;
+		document.getElementById("demo").innerHTML = "Happiness Levels:" + valHappiness;
+		document.getElementById("demo").innerHTML = "Neutral Levels:" + valNeutral;
+		document.getElementById("demo").innerHTML = "Sadness Levels:" + valSadness;
+		document.getElementById("demo").innerHTML = "Surprise Levels:" + valSurprise;
+		document.getElementById("demo").innerHTML = "Moustache Levels:" + valMoustache;
+		document.getElementById("demo").innerHTML = "Sideburn Levels:" + valSideburns;
+		document.getElementById("demo").innerHTML = "Beard Levels:" + valBeard;
+	}
+		</script>
+		
+</head>
+<body>
+
+<p id = "demo"> </p> 
+
+<h1>Detect Faces:</h1>
+Enter the URL to an image that includes a face or faces, then click the <strong>Analyze face</strong> button.
+<br><br>
+Image to analyze: <input type="text" name="inputImage" id="inputImage" value="https://upload.wikimedia.org/wikipedia/commons/c/c3/RH_Louise_Lillian_Gish.jpg" />
+<button onclick="processImage()">Analyze face</button>
+<button onclick="lmao()">Display data</button>
+<br><br>
+<div id="wrapper" style="width:1020px; display:table;">
+    <div id="jsonOutput" style="width:600px; display:table-cell;">
+	
+        Response:
+        <br><br>
+        <textarea id="CalebLmao" class="UIInput" style="width:580px; height:400px;"></textarea>
+    </div>
+    <div id="imageDiv" style="width:420px; display:table-cell;">
+        Source image:
+        <br><br>
+        <img id="sourceImage" width="400" />
+    </div>
+	
+</div>
+		<button onclick = "showStats()"> Stats </button>
+		<div id="stat_div" align = "center" style "display: none;">
+			<div id="emotionChart_div"></div>
+			<div id="hairyChart_div"></div>
+		</div>
+</body>
+</html>
+
+<!-- 
+=======
+
+
+</body></html>
+>>>>>>> adeb0798e8a1a2d2a19eaf4a01e1d9017a8b012a 
+-->
